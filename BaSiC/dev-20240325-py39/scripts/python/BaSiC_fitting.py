@@ -56,7 +56,7 @@ def main(zarr:str, C:int, field:str, out:str, T:int=1, basic_options:dict={}) ->
     n_fov = len(fovs)
     # Use all (or part) or the positions to fit the model
     if n_fov > 500:
-        n = len(fovs) // 100
+        n = n_fov // 100
         logger.info(f"Too many positions to fit the model. Use only around 100 of the positions.")
     else:
         logger.info(f"Use all positions to fit the model.")

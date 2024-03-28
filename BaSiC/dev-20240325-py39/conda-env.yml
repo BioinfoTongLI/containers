@@ -8,3 +8,4 @@ dependencies:
       - aicsimageio==4.14.0
       - fire==0.5.0
       - ome-zarr==0.8.0
+      - ome-types==0.5.1
