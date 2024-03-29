@@ -62,7 +62,7 @@ def main(field:str, out_dir:str, format:str=None) -> None:
         store = zarr.ZipStore(out_dir, compression=zipfile.ZIP_STORED, mode='w')
         storage_options = {'compressor': Zlib(level=0)}
     elif format == "tif" or format == "tiff":
-        Path(out_dir).parent.mkdir(parents=True)
+        Path(out_dir).parent.mkdir(parents=True, exist_ok=True)
         OmeTiffWriter.save(np.expand_dims(np.vstack(corrected_stack), 0), out_dir,
             # dim_order=[d["name"] for d in config['multiscales'][0]['axes']]
         )
