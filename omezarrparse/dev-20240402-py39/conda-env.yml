@@ -1,0 +1,9 @@
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - pip
+  - pip:
+      - fire==0.5.0
+      - ome-zarr==0.8.0
+      - ome-types==0.5.1
