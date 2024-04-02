@@ -17,7 +17,7 @@ def version() -> str:
     return "0.0.1"
 
 
-def main(zarr_path:str, params_json:str) -> None:
+def main(zarr_path:str, out_params_json:str) -> None:
     """
     This function parses the OME-Zarr metadata and generates a JSON file with the extracted information.
 
@@ -42,7 +42,7 @@ def main(zarr_path:str, params_json:str) -> None:
         metrics = []
         for serie in series:
             metrics.append([{'id': Path(zarr_path).stem}, original_path, serie, chs_meta, pixel_size_xy_meta, pos_md])
-    with open(params_json, 'w') as f:
+    with open(out_params_json, 'w') as f:
         json.dump(metrics, f)
     
 
