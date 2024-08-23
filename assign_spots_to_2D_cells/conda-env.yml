@@ -1,0 +1,11 @@
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - pip
+  - pip:
+      - fire==0.5.0
+      - aicsimageio==4.14.0
+      - shapely==2.0.3
+      - pandas==2.2.2
+      - anndata==0.10.8
