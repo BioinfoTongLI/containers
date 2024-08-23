@@ -11,7 +11,6 @@ from aicsimageio import AICSImage
 import numpy as np
 from spotiflow.model import Spotiflow
 from dask.distributed import Client
-import torch
 import numpy as np
 import math
 import csv
