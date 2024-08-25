@@ -1,5 +1,7 @@
 pandas==2.0.3
 aicsimageio==4.11.0
 fire==0.6.0
-ome-zarr==0.8.0
 starfish==0.2.2
+scikit-image==0.24.0
+shapely==2.0.6
+tqdm==4.66.5
