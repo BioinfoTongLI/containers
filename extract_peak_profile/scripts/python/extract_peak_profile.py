@@ -1,3 +1,7 @@
+#! /usr/bin/env python3
+# -*- coding: utf-8 -*-
+# vim:fenc=utf-8
+
 from aicsimageio import AICSImage
 import pandas as pd
 from skimage.morphology import disk
@@ -67,11 +71,11 @@ def main(image:str, peaks:str, stem:str,
     ).astype(np.int16)
     print(formatted_peak_profiles.shape)
     np.save(
-        f"{stem}_extracted_peak_intensities.npy",
+        f"{stem}.npy",
         formatted_peak_profiles,
         allow_pickle=True,
     )
-    pd.DataFrame(spots, columns=["y_int", "x_int"]).to_csv(f"{stem}_peak_locs.csv", index=False)
+    pd.DataFrame(spots, columns=["y_int", "x_int"]).to_csv(f"{stem}_locations.csv", index=False)
         
     
 if __name__ == "__main__":

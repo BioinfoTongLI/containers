@@ -5,6 +5,6 @@ RUN apt-get update && \
 
 COPY requirements.txt /tmp/requirements.txt
 
-COPY scripts/python /scripts/
-
 RUN pip install -U -r /tmp/requirements.txt --no-cache-dir
+
+COPY scripts/python /scripts/
