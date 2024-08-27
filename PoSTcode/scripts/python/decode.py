@@ -19,7 +19,7 @@ def ReadPrepCodebook_ISS(codebook_path):
     codebook_in = pd.read_csv(codebook_path)
     codes = codebook_in['code']
     n_genes = len(codes); n_rounds = len(str(codes[0]))
-    codebook_3d = np.zeros((n_genes, 1, n_rounds), dtype =  'uint16')
+    codebook_3d = np.zeros((n_genes, 1, n_rounds), dtype =  'uint8')
     for ng in range(n_genes):
         for nr in range(n_rounds):
             codebook_3d[ng, 0, nr] = int(str(codes[ng])[nr])
@@ -33,7 +33,7 @@ def ReadPrepCodebook_MER(codebook_path, N_readouts):
     '''
     codebook_in = pd.read_csv(codebook_path)
     n_genes = codebook_in.shape[0]; n_rounds = N_readouts
-    codebook_3d = np.zeros((n_genes, 1, n_rounds), dtype =  'uint16')
+    codebook_3d = np.zeros((n_genes, 1, n_rounds), dtype =  'uint8')
     for ng in range(n_genes):
         for nr in range(n_rounds):
             column_name = 'Readout_' + str(nr+1)
@@ -47,7 +47,8 @@ def decode(spot_locations_p: str,
            codebook_p: str,
            readouts_csv: str=None,
            keep_noises=True,
-           min_prob = 0.95) -> pd.DataFrame:
+           min_prob = 0.95,
+           R:int=6) -> pd.DataFrame:
     """
     Decodes spots using the Postcode algorithm.
 
@@ -59,28 +60,40 @@ def decode(spot_locations_p: str,
         keep_noises (bool, optional): Whether to keep spots that were classified as 'background' or 'infeasible'.
         min_prob: [0,1] - value of minimum allowed probability of decoded spot
             Defaults to True.
+        R (int, optional): Number of rounds. Defaults to 6.
 
     Returns:
         pd.DataFrame: A pandas DataFrame containing the decoded spots and their locations.
     """
     stem = Path(spot_profile_p).stem
     spot_locations = pd.read_csv(spot_locations_p)
+
+    spot_profile = np.load(spot_profile_p)
+    if len(spot_profile.shape) == 2:
+        # if the spot_profile is two dimensional, it is assumed that the spot_profile is in
+        # the shape of (n_channel*n_cycle, n_spot). Then reshape it.
+        n_ch, n_spots = spot_profile.shape
+        # fine DAPI/Hoechst channel indexes and remove them from the profile
+        n_chs_per_cycle = n_ch // R
+        coding_mask_pre_cycle = np.ones(n_chs_per_cycle)
+        coding_mask_pre_cycle[0] = 0 # remove DAPI/Hoechst channel
+        coding_ch_mask = np.array(list(coding_mask_pre_cycle) * R, dtype=bool)
+        spot_profile = spot_profile[coding_ch_mask].reshape(n_spots, n_chs_per_cycle - 1, R)
+
     if readouts_csv:
-        spot_profile, N_readouts = average_spot_profiles(spot_profile_p, readouts_csv) # Average is chosen over max for MERFISH
+        spot_profile, N_readouts = average_spot_profiles(spot_profile, readouts_csv) # Average is chosen over max for MERFISH-like profiles
         gene_list, codebook_arr, K = ReadPrepCodebook_MER(codebook_p, N_readouts)
     else:
-        spot_profile = np.load(spot_profile_p)
-        N_readouts = spot_profile.shape[1]
         gene_list, codebook_arr, K = ReadPrepCodebook_ISS(codebook_p)
 
     assert spot_locations.shape[0] == spot_profile.shape[0]
+    spot_profile = np.nan_to_num(spot_profile, nan=0)
     # Decode using postcode
     out = decoding_function(spot_profile, codebook_arr, print_training_progress=False)
     
     
     # Reformat output into pandas dataframe
-    df_class_names = np.concatenate((gene_list,
-                                        ['infeasible', 'background', 'nan']))
+    df_class_names = np.concatenate((gene_list, ['infeasible', 'background', 'nan']))
     barcodes_0123 = codebook_arr[:,0,:]
     channel_base = ['T', 'G', 'C', 'A']
     barcodes_AGCT = np.empty(K, dtype='object')
@@ -104,4 +117,4 @@ if __name__ == "__main__":
         "run": decode,
         "version": VERSION 
     }
-    fire.Fire(decode)
+    fire.Fire(options)

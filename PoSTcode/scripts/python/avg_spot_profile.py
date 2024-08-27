@@ -38,12 +38,11 @@ def prep_averaged_spot_profiles(spot_profiles, readout_table, Nmax):
     return avg_spot_profile
 
 
-def main(path_spot_profile_input, path_readouts_csv):
+def main(spot_profiles, path_readouts_csv):
     ## this function takes computed for all cycle-channels spot profiles and create an average version for each readout
     ## readouts_csv should contain N rows and M columns, where N - is number of cycles and M is number of channels
     ## cells should be filled like "Readout 1", "Readout 2" etc starting from 1 not 0
     readouts_table =  pd.read_csv(path_readouts_csv)
-    spot_profiles = np.load(path_spot_profile_input)
     assert spot_profiles.shape[1]==readouts_table.shape[1], "number of channels is different in npy file and in readouts csv!"
     assert spot_profiles.shape[2]==readouts_table.shape[0], "number of cycles is different in npy file and in readouts csv!"
     Nmax = find_max_n_readouts(readouts_table)
