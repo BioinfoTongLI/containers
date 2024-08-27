@@ -1,104 +1,107 @@
-#! /usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# vim:fenc=utf-8
-"""
-Take previously detected spots and GMM decode them
-"""
 
 import numpy as np
 import pandas as pd
+import fire
+from pathlib import Path
+from avg_spot_profile import main as average_spot_profiles
 from decoding_functions import decoding_function, decoding_output_to_dataframe
-import pickle
 
 
 VERSION="0.0.1"
 
-def map_to_index(peak_row):
-    indexes = []
-    NAME_INDEX_MAP = {"A": "4", "T": "3", "G": "2", "C": "1"}
-    for n in peak_row.Code:
-        if isinstance(n, str) and n not in ["infeasible", "background", "0000", "nan", "NA"]:
-            indexes.append("".join(NAME_INDEX_MAP.get(i, "") for i in n))
-        else:
-            indexes.append("")
-    return indexes
+def ReadPrepCodebook_ISS(codebook_path):
+    '''
+    ISS stands for In Situ Sequencing. It is a method for encoding ISS data.
+    '''
+    #I consider single channel!
+    codebook_in = pd.read_csv(codebook_path)
+    codes = codebook_in['code']
+    n_genes = len(codes); n_rounds = len(str(codes[0]))
+    codebook_3d = np.zeros((n_genes, 1, n_rounds), dtype =  'uint16')
+    for ng in range(n_genes):
+        for nr in range(n_rounds):
+            codebook_3d[ng, 0, nr] = int(str(codes[ng])[nr])
+    gene_list_obj = np.array(codebook_in['gene'], dtype = object)
+    return gene_list_obj, codebook_3d, n_genes
 
 
-def decode(
-    stem:str,
-    spot_profile:str,
-    spot_loc:str,
-    barcodes_01:str,
-    gene_names:str,
-    channels_info:str,
-    chunk_size:int=3 * 10**6,
-    n_cycle:int=6,
-    n_ch:int=4, # number of channels other than DAPI
-):
-    R_C_index = [f"R{i}_C{j}" for j in range(n_ch) for i in range(n_cycle)]
+def ReadPrepCodebook_MER(codebook_path, N_readouts):
+    '''
+    MER stands for Multiplex Error Robust. It is a method for encoding MERFISH data.
+    '''
+    codebook_in = pd.read_csv(codebook_path)
+    n_genes = codebook_in.shape[0]; n_rounds = N_readouts
+    codebook_3d = np.zeros((n_genes, 1, n_rounds), dtype =  'uint16')
+    for ng in range(n_genes):
+        for nr in range(n_rounds):
+            column_name = 'Readout_' + str(nr+1)
+            codebook_3d[ng, 0, nr] = int(codebook_in[column_name][ng])
+    gene_list_obj = np.array(codebook_in['gene'], dtype = object)
+    return gene_list_obj, codebook_3d, n_genes
 
-    # load
-    spot_profile = np.load(spot_profile, allow_pickle=True)
-    profile_df = pd.DataFrame(
-        spot_profile.reshape(spot_profile.shape[0], -1), columns=R_C_index
-    )
 
-    if spot_loc.endswith(".tsv"):
-        spot_loc = pd.read_csv(spot_loc, index_col=0, sep="\t")
+def decode(spot_locations_p: str,
+           spot_profile_p: str,
+           codebook_p: str,
+           readouts_csv: str=None,
+           keep_noises=True,
+           min_prob = 0.95) -> pd.DataFrame:
+    """
+    Decodes spots using the Postcode algorithm.
+
+    Args:
+        spot_locations_p (str): A file path to pandas DataFrame containing the spot locations.
+        spot_profile_p (str): A file path to numpy array containing the spot profiles (N x C x R).
+        codebook (str): Cortana-like codebook with only one channel and number of rounds (readouts)
+        readouts_csv (str, optional): csv file with table which describes link between cycle-channels and readouts
+        keep_noises (bool, optional): Whether to keep spots that were classified as 'background' or 'infeasible'.
+        min_prob: [0,1] - value of minimum allowed probability of decoded spot
+            Defaults to True.
+
+    Returns:
+        pd.DataFrame: A pandas DataFrame containing the decoded spots and their locations.
+    """
+    stem = Path(spot_profile_p).stem
+    spot_locations = pd.read_csv(spot_locations_p)
+    if readouts_csv:
+        spot_profile, N_readouts = average_spot_profiles(spot_profile_p, readouts_csv) # Average is chosen over max for MERFISH
+        gene_list, codebook_arr, K = ReadPrepCodebook_MER(codebook_p, N_readouts)
     else:
-        spot_loc = pd.read_csv(spot_loc, index_col=0)
-    print(spot_profile.shape, spot_loc)
-    barcodes_01 = np.load(barcodes_01, allow_pickle=True)
-    gene_names = np.load(gene_names, allow_pickle=True)
-    with open(channels_info, "rb") as fp:
-        channels_info = pickle.load(fp)
-    df_class_codes = np.concatenate(
-        (channels_info["barcodes_AGCT"], ["NA", "0000", "NA"])
-    )
-    df_class_names = np.concatenate((gene_names, ["infeasible", "background", "nan"]))
-    print(df_class_names)
+        spot_profile = np.load(spot_profile_p)
+        N_readouts = spot_profile.shape[1]
+        gene_list, codebook_arr, K = ReadPrepCodebook_ISS(codebook_p)
 
-    n_spot = spot_profile.shape[0]
-    n_chunk = int(np.round(n_spot / chunk_size)) + 1
-
-    if n_spot >= chunk_size:
-        # if there are too much spots
-        decoded_list = [
-            decoding_function(chunk, barcodes_01, print_training_progress=False)
-            for chunk in np.array_split(spot_profile, n_chunk, axis=0)
-        ]
-        decoded_spots_df = pd.concat(
-            [
-                decoding_output_to_dataframe(decoded, df_class_names, df_class_codes)
-                for decoded in decoded_list
-            ]
-        )
+    assert spot_locations.shape[0] == spot_profile.shape[0]
+    # Decode using postcode
+    out = decoding_function(spot_profile, codebook_arr, print_training_progress=False)
+    
+    
+    # Reformat output into pandas dataframe
+    df_class_names = np.concatenate((gene_list,
+                                        ['infeasible', 'background', 'nan']))
+    barcodes_0123 = codebook_arr[:,0,:]
+    channel_base = ['T', 'G', 'C', 'A']
+    barcodes_AGCT = np.empty(K, dtype='object')
+    for k in range(K):
+        barcodes_AGCT[k] = ''.join(list(np.array(channel_base)[barcodes_0123[k, :]]))
+    df_class_codes = np.concatenate((barcodes_AGCT, ['NA', '0000', 'NA']))
+    decoded_spots_df = decoding_output_to_dataframe(out, df_class_names, df_class_codes)
+    
+    decoded_df_s = pd.concat([decoded_spots_df, spot_locations], axis=1)
+    decoded_df_s = decoded_df_s[decoded_df_s['Probability']>min_prob]
+    
+    if keep_noises:
+        decoded_df_s.to_csv(f"{stem}_decoded_spots.csv", index=False)
     else:
-        # estimate GMM parameters and compute class probabilities
-        out = decoding_function(
-            spot_profile, barcodes_01, print_training_progress=False
-        )
-        # creating a data frame from the decoding output
-        decoded_spots_df = decoding_output_to_dataframe(
-            out, df_class_names, df_class_codes
-        )
-        with open(f"{stem}_decode_out_parameters.pickle", "wb") as fp:
-            pickle.dump(out, fp, protocol=4)
-
-    assert decoded_spots_df.shape[0] == spot_loc.shape[0]
-    decoded_spots_df.loc[:, "y_int"] = spot_loc.y_int.values
-    decoded_spots_df.loc[:, "x_int"] = spot_loc.x_int.values
-    decoded_spots_df = decoded_spots_df.assign(index_code=map_to_index, axis=1)
-    decoded_spots_df = pd.concat([decoded_spots_df, profile_df], axis=1)
-    # assert decoded_spots_df.isnull().values.any() # shouldn't have any nan in the df
-
-    decoded_spots_df.to_csv(f"{stem}_decoded_df.tsv", sep="\t", index=False)
-
+        # Remove infeasible and background codes
+        decoded_df_s[~np.isin(decoded_df_s['Name'], ['background', 'infeasible'])].reset_index(drop=True).to_csv(f"{stem}_decoded_spots.csv", index=False)
+    
 
 if __name__ == "__main__":
-    import fire
     options = {
         "run": decode,
-        "version": VERSION
+        "version": VERSION 
     }
-    fire.Fire(options)
+    fire.Fire(decode)
