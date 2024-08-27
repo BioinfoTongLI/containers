@@ -4,6 +4,7 @@
 """
 Take previously detected spots and GMM decode them
 """
+
 import numpy as np
 import pandas as pd
 from decoding_functions import decoding_function, decoding_output_to_dataframe
@@ -11,44 +12,31 @@ import pickle
 
 
 VERSION="0.0.1"
+
 def map_to_index(peak_row):
     indexes = []
     NAME_INDEX_MAP = {"A": "4", "T": "3", "G": "2", "C": "1"}
     for n in peak_row.Code:
-        if (
-            not isinstance(n, float)
-            and n != "infeasible"
-            and n != "background"
-            and n != "0000"
-            and n.lower() != "nan"
-            and n != "NA"
-        ):
-            indexes.append("".join([NAME_INDEX_MAP[i] for i in n]))
+        if isinstance(n, str) and n not in ["infeasible", "background", "0000", "nan", "NA"]:
+            indexes.append("".join(NAME_INDEX_MAP.get(i, "") for i in n))
         else:
             indexes.append("")
     return indexes
 
 
-def get_column_names(n_ch, n_cyc):
-    R_C_index = []
-    for j in range(n_ch):
-        for i in range(n_cyc):
-            R_C_index.append(f"R{i}_C{j}")
-    return R_C_index
-
-
 def decode(
-    stem,
-    spot_profile,
-    spot_loc,
-    barcodes_01,
-    gene_names,
-    channels_info,
-    chunk_size=3 * 10**6,
-    n_cycle=6,
-    n_ch=4,
+    stem:str,
+    spot_profile:str,
+    spot_loc:str,
+    barcodes_01:str,
+    gene_names:str,
+    channels_info:str,
+    chunk_size:int=3 * 10**6,
+    n_cycle:int=6,
+    n_ch:int=4, # number of channels other than DAPI
 ):
-    R_C_index = get_column_names(n_ch, n_cycle)
+    R_C_index = [f"R{i}_C{j}" for j in range(n_ch) for i in range(n_cycle)]
+
     # load
     spot_profile = np.load(spot_profile, allow_pickle=True)
     profile_df = pd.DataFrame(

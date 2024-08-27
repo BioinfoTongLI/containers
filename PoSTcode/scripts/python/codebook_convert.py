@@ -9,6 +9,18 @@ from collections import OrderedDict
 
 
 VERSION = "0.0.1"
+"""
+Example of Cartana codebook:
+
+gene,code,cycle1_channel1_AF750,cycle1_channel2_Cy5,cycle1_channel3_Cy3,cycle1_channel4_AF488,cycle1_channel5_DAPI,cycle2_chann
+el1_AF750,cycle2_channel2_Cy5,cycle2_channel3_Cy3,cycle2_channel4_AF488,cycle2_channel5_DAPI,cycle3_channel1_AF750,cycle3_chann
+el2_Cy5,cycle3_channel3_Cy3,cycle3_channel4_AF488,cycle3_channel5_DAPI,cycle4_channel1_AF750,cycle4_channel2_Cy5,cycle4_channel
+3_Cy3,cycle4_channel4_AF488,cycle4_channel5_DAPI,cycle5_channel1_AF750,cycle5_channel2_Cy5,cycle5_channel3_Cy3,cycle5_channel4_
+AF488,cycle5_channel5_DAPI,cycle6_channel1_AF750,cycle6_channel2_Cy5,cycle6_channel3_Cy3,cycle6_channel4_AF488,cycle6_channel5_
+DAPI
+ACTG2,442412,0,0,0,1,0,0,0,0,1,0,0,1,0,0,0,0,0,0,1,0,1,0,0,0,0,0,1,0,0,0
+APLNR,341231,0,0,1,0,0,0,0,0,1,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,1,0,0,0,0
+"""
 def main(csv_file,
          channel_map:dict={"Cy5": "A", "AF488": "G", "Cy3": "C", "Atto425": "T", "AF750":"T"}, # This is orderd! be cautious !!!
          sep=","):
