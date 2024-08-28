@@ -10,3 +10,8 @@ WORKDIR /opt
 
 # v0.3.0
 RUN pip install https://github.com/royerlab/ultrack/archive/refs/tags/v0.3.0.zip
+
+
+COPY Dockerfile /docker
+
+RUN chmod -R 755 /docker

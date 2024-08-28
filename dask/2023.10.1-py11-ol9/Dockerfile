@@ -53,3 +53,7 @@ COPY scripts/* /opt/scripts/daskscripts/
 COPY config /opt/scripts/daskscripts/config
 
 RUN chmod 755 /opt/scripts/daskscripts/*.sh
+
+COPY Dockerfile /docker
+
+RUN chmod -R 755 /docker

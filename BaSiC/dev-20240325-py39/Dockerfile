@@ -20,4 +20,8 @@ RUN cd /opt && \
     pip install .
 
 # Downgrade to 0.4.23
-RUN pip install --upgrade jax==0.4.23 "jax[cuda11_pip]==0.4.23" -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html \
+RUN pip install --upgrade jax==0.4.23 "jax[cuda11_pip]==0.4.23" -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
+
+COPY Dockerfile /docker
+
+RUN chmod -R 755 /docker

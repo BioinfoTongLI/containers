@@ -10,5 +10,8 @@ COPY conda-env.yml /tmp/
 
 RUN mamba env update -n base -f /tmp/conda-env.yml
 
-
 COPY scripts/python /opt/scripts/
+
+COPY Dockerfile /docker
+
+RUN chmod -R 755 /docker

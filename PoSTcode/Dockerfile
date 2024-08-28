@@ -8,3 +8,7 @@ COPY requirements.txt /tmp/requirements.txt
 RUN pip install -U -r /tmp/requirements.txt --no-cache-dir
 
 COPY scripts/python /scripts/
+
+COPY Dockerfile /docker
+
+RUN chmod -R 755 /docker
