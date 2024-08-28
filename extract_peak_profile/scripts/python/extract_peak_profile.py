@@ -65,8 +65,7 @@ def main(image:str, peaks:str, stem:str,
         peak_profile_surroundings = image_stack[ch].compute()[Ys, Xs]
         max_intensity = np.max(peak_profile_surroundings, axis=0)
         peak_intensities.append(max_intensity)
-    print(np.array(peak_intensities)[:, 0])
-    formatted_peak_profiles = np.array(peak_intensities).astype(np.int16)
+    formatted_peak_profiles = np.array(peak_intensities).astype(np.int32)
     print(formatted_peak_profiles.shape)
     np.save(
         f"{stem}.npy",
