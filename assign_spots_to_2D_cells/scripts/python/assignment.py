@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# Copyright (c) 2024 Wellcome Sanger Institute
 from aicsimageio import AICSImage
 import pandas as pd
 import fire
@@ -15,7 +18,7 @@ def main(label_image:str, transcripts:str, out_name:str,
          x_col:str='x_location',
          feature_col:str='feature_name',
     ):
-    logger.log('Reading image and transcripts')
+    logger.info('Reading image and transcripts')
     if transcripts.endswith('.csv'):
         spots = pd.read_csv(transcripts, header=0, sep=',')[[y_col, x_col, feature_col]]
     elif transcripts.endswith('.tsv'):
@@ -31,7 +34,10 @@ def main(label_image:str, transcripts:str, out_name:str,
         spots["feature_name"] = 'spot'
     else:
         raise ValueError('Format not recognized. Please provide a csv, tsv or wkt file')
-    lab_2D = AICSImage(label_image)
+    if label_image.endswith('.tiff') or label_image.endswith('.tif'):
+        lab_2D = AICSImage(label_image)
+    else:
+        raise ValueError('Format not recognized. Please provide a tiff file')
     logger.info('Assigning spots to cells')
     cell_id = lab_2D.dask_data[spots["y_location"].astype(int)/pixelsize, spots["x_location"].astype(int)/pixelsize]
     spots['cell_id'] = cell_id
