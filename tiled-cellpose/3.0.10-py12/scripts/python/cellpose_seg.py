@@ -1,5 +1,6 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
+# Copyright (c) 2024 Wellcome Sanger Institute
 
 """
 This script will slice the image in XY dimension and save the slices coordinates in json files
@@ -7,11 +8,13 @@ This script will slice the image in XY dimension and save the slices coordinates
 import fire
 from aicsimageio import AICSImage
 import os
-from cellpose import core, io, models, denoise
+from cellpose import core, io, models
 import numpy as np
 from shapely import Polygon, wkt, MultiPolygon
 
 import logging
+
+logging.basicConfig(level=logging.INFO)
 
 VERSION="0.0.1"
 
@@ -28,7 +31,6 @@ def main(
     ):
 
     logging.info(f"Loading Cellpose model: {cellpose_model} (GPU: {core.use_gpu()})")
-    print(f"Loading Cellpose model: {cellpose_model} (GPU: {core.use_gpu()})")
 
     model = models.Cellpose(gpu=core.use_gpu(), model_type=cellpose_model)
     # model = denoise.CellposeDenoiseModel(
@@ -87,7 +89,7 @@ def main(
         with open(wkt_filename, "wt") as f:
             f.write(wkt.dumps(MultiPolygon(wkts)))
     else:
-        print("No outlines file found")
+        logging.info("No outlines file found")
         with open(os.path.join(out_dir, f"{out_dir}_cp_outlines.wkt"), "wt") as f:
             f.write("")
 

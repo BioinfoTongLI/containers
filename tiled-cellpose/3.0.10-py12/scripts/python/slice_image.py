@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
-
+# Copyright (c) 2024 Wellcome Sanger Institute
 """
 This script will slice the image in XY dimension and save the slices coordinates in json files
 """
@@ -24,17 +24,20 @@ def calculate_slices(image_size, chunk_size, overlap):
     return slices
 
 
-def save_chunk_locations(arr, block_info, block_id, out_folder, overlap):
-    print(block_id)
-    array_loc = "_".join([str(i) for i in block_info[0]["array-location"]])
-    file_name = f"{out_folder}/{array_loc}.json"
-    print(file_name)
-    # Remove 'dtype' from block_info
-    del block_info[None]['dtype']
-    block_info["overlap"] = overlap
-    with open(file_name, "w") as f:
-        json.dump(block_info, f)
-    return arr
+'''
+Deprecating this function as it will duplicate the data and not used in the main function
+'''
+# def save_chunk_locations(arr, block_info, block_id, out_folder, overlap):
+#     print(block_id)
+#     array_loc = "_".join([str(i) for i in block_info[0]["array-location"]])
+#     file_name = f"{out_folder}/{array_loc}.json"
+#     print(file_name)
+#     # Remove 'dtype' from block_info
+#     del block_info[None]['dtype']
+#     block_info["overlap"] = overlap
+#     with open(file_name, "w") as f:
+#         json.dump(block_info, f)
+#     return arr
 
 
 def main(image:str, out:str, overlap:int=30, chunk_size:int=4096):
