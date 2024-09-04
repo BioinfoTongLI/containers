@@ -20,4 +20,4 @@ COPY scripts/python /scripts/
 COPY Dockerfile /docker
 
 # Change permissions
-RUN chmod -R 755 /docker
+RUN chmod -R 755 /docker && chmod -R 755 /usr/bin/
