@@ -7,7 +7,7 @@ import fire
 
 VERSION = "0.0.1"
 def main(xenium_input:str, out_name:str, **kwargs):
-    xenium.xenium(xenium_input, **kwargs).write(out_name)
+    xenium(xenium_input, **kwargs).write(out_name)
 
 if __name__ == '__main__':
     options = {
