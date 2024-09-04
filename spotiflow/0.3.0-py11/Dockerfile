@@ -1,23 +1,29 @@
-FROM rapidsai/miniforge-cuda:cuda11.8.0-base-ubuntu22.04-py3.11
+# Use multi-stage builds
+FROM rapidsai/miniforge-cuda:cuda11.8.0-base-ubuntu22.04-py3.11 as builder
 
+# Install git and clean up in the same layer
 RUN apt-get update && \
-    apt-get install -y git
+    apt-get install -y git && \
+    rm -rf /var/lib/apt/lists/*
 
 WORKDIR /opt
 
-# nightly
-# RUN pip install git+https://github.com/weigertlab/spotiflow.git
-
-# v0.3.0
-# RUN pip install https://github.com/weigertlab/spotiflow/archive/refs/tags/0.3.0.zip
-
-# RUN mamba install pytorch torchvision pytorch-cuda=11.8 -c pytorch -c nvidia -y && pip install spotiflow
+# Copy only the necessary files
 COPY conda-env.yml /tmp/
-
-RUN mamba env update -n base -f /tmp/conda-env.yml
-
 COPY scripts/python /scripts/
-
 COPY Dockerfile /docker
 
-RUN chmod -R 755 /docker
+# Update environment and set permissions in the same layer
+RUN mamba env update -n base -f /tmp/conda-env.yml && \
+    chmod -R 755 /usr/bin/ && \
+    chmod -R 755 /scripts/ && \
+    chmod -R 755 /docker
+
+# Final stage
+FROM rapidsai/miniforge-cuda:cuda11.8.0-base-ubuntu22.04-py3.11
+
+COPY --from=builder /opt /opt
+COPY --from=builder /scripts /scripts
+COPY --from=builder /docker /docker
+
+WORKDIR /opt
