@@ -1,6 +1,6 @@
-#! /usr/bin/env python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# vim:fenc=utf-8
+# Copyright (c) 2024 Wellcome Sanger Institute
 
 import fire
 from pandas import DataFrame
