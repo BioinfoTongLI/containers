@@ -17,7 +17,8 @@ COPY Dockerfile /docker
 RUN mamba env update -n base -f /tmp/conda-env.yml && \
     chmod -R 755 /usr/bin/ && \
     chmod -R 755 /scripts/ && \
-    chmod -R 755 /docker
+    chmod -R 755 /docker && \
+    chmod -R 755 /opt/conda/bin/
 
 # Final stage
 FROM rapidsai/miniforge-cuda:cuda11.8.0-base-ubuntu22.04-py3.11
