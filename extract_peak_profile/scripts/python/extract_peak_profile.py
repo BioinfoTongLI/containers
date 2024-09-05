@@ -1,6 +1,6 @@
-#! /usr/bin/env python3
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# vim:fenc=utf-8
+# Copyright (c) 2024 Wellcome Sanger Institute
 
 from aicsimageio import AICSImage
 import pandas as pd
