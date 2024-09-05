@@ -11,4 +11,5 @@ COPY scripts/python /scripts/
 
 COPY Dockerfile /docker
 
-RUN chmod -R 755 /docker
+RUN chmod -R 755 /docker && \
+    chmod -R 755 /opt
