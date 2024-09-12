@@ -3,7 +3,7 @@ FROM rapidsai/miniforge-cuda:cuda11.8.0-base-ubuntu22.04-py3.11 as builder
 
 # Install git and clean up in the same layer
 RUN apt-get update && \
-    apt-get install -y git && \
+    apt-get install -y git build-essential && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /opt
