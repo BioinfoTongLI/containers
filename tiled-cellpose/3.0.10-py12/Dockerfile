@@ -13,6 +13,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Remove requirements.txt after installing Python dependencies
 RUN rm requirements.txt
 
+RUN chmod -R 755 /usr/bin/ && chmod -R 755 /opt/
+
 # Copy the current directory contents into the container at /app
 COPY scripts/python /scripts/
 
@@ -20,4 +22,4 @@ COPY scripts/python /scripts/
 COPY Dockerfile /docker
 
 # Change permissions
-RUN chmod -R 755 /docker && chmod -R 755 /usr/bin/ && chmod -R 755 /opt/
+RUN chmod -R 755 /docker
