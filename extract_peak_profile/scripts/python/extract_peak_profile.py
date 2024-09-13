@@ -21,8 +21,8 @@ def make_in_range(l, upper):
 
 def main(image:str, peaks:str, stem:str,
          pixelsize:float=1.0, peak_radius:int=4,
-         y_col:str='y_location',
-         x_col:str='x_location'):
+         y_col:str='y_int',
+         x_col:str='x_int'):
     print('Reading image and transcripts')
     if peaks.endswith('.csv'):
         spots = pd.read_csv(peaks, header=0, sep=',')[[y_col, x_col]].values
