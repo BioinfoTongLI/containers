@@ -16,7 +16,7 @@ import logging
 
 logging.basicConfig(level=logging.INFO)
 
-VERSION="0.0.1"
+VERSION="0.0.2"
 
 
 def main(
@@ -25,7 +25,7 @@ def main(
     out_dir:str,
     cell_diameter:int=30,
     cellpose_model:str="cyto3",
-    is_3d:bool=False,
+    zs:list=[0],
     channels:list=[0, 0],
     **cp_params
     ):
@@ -42,18 +42,23 @@ def main(
 
     img = AICSImage(image)
     ch_ind = channels[0] if len(np.unique(channels)) == 1 else channels
-    z = 0 if not is_3d else -1
-    lazy_one_plane = img.get_image_dask_data("ZCYX", T=0, C=ch_ind, Z=z)
-    crop = np.squeeze(lazy_one_plane[:, :, y_min:y_max, x_min:x_max].compute())
+    lazy_one_plane = img.get_image_dask_data(
+        "ZCYX",
+        T=0, # only one time point is allowed for now
+        C=ch_ind,
+        Z=zs)
+    crop = lazy_one_plane[:, :, x_min:x_max, y_min:y_max].compute()
     masks, flows, _, _ = model.eval(
         crop,
         channels=channels,
         diameter=cell_diameter,
+        channel_axis=1,
+        z_axis=0,
         **cp_params,
     )
     os.mkdir(out_dir)
     io.save_masks(
-        crop,
+        crop[0, 0],
         masks,
         flows,
         file_names=out_dir,
