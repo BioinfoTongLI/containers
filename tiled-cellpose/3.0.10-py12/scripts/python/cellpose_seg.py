@@ -58,7 +58,7 @@ def main(
     )
     os.mkdir(out_dir)
     io.save_masks(
-        crop[0, 0],
+        np.squeeze(crop),
         masks,
         flows,
         file_names=out_dir,
@@ -71,7 +71,8 @@ def main(
     )
     # convert cellpose outlines to WTK
     logging.info(f"Converting outlines to WKT format")
-    outlines_file = os.path.join(out_dir, f"{out_dir}_cp_outlines.txt")
+    prefix = out_dir.split(".")[0]
+    outlines_file = os.path.join(out_dir, f"{prefix}_cp_outlines.txt")
     if os.path.exists(outlines_file):
         wkts = []
         with open(outlines_file, "rt") as f:
