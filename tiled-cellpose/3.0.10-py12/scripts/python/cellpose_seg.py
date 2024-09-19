@@ -84,8 +84,8 @@ def main(
                     continue
                 outline = np.array(list(zip(outline[::2], outline[1::2])))
                 # transport tile coordinats to original image coordinates
-                outline[:, 0] += x_min
-                outline[:, 1] += y_min
+                outline[:, 0] += y_min
+                outline[:, 1] += x_min
                 poly = Polygon(outline).buffer(0)
                 if isinstance(poly, MultiPolygon):
                     poly = poly.geoms[0]
