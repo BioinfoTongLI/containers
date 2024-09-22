@@ -42,7 +42,7 @@ Deprecating this function as it will duplicate the data and not used in the main
 
 def main(image:str, out:str, overlap:int=30, chunk_size:int=4096):
     img = AICSImage(image)
-    lazy_one_plane = img.get_image_dask_data("YX")
+    lazy_one_plane = img.get_image_dask_data("XY")
     slices = calculate_slices(lazy_one_plane.shape, chunk_size, overlap)
     os.mkdir(out)
     # Create a CSV file to write the slices

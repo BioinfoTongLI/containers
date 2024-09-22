@@ -47,7 +47,7 @@ def main(
         T=0, # only one time point is allowed for now
         C=ch_ind,
         Z=zs)
-    crop = lazy_one_plane[:, :, x_min:x_max, y_min:y_max].compute()
+    crop = lazy_one_plane[:, :, y_min:y_max, x_min:x_max].compute()
     masks, flows, _, _ = model.eval(
         crop,
         channels=channels,
@@ -84,8 +84,8 @@ def main(
                     continue
                 outline = np.array(list(zip(outline[::2], outline[1::2])))
                 # transport tile coordinats to original image coordinates
-                outline[:, 0] += y_min
-                outline[:, 1] += x_min
+                outline[:, 0] += x_min
+                outline[:, 1] += y_min
                 poly = Polygon(outline).buffer(0)
                 if isinstance(poly, MultiPolygon):
                     poly = poly.geoms[0]
