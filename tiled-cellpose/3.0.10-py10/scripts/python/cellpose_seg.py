@@ -71,7 +71,11 @@ def main(
     )
     # convert cellpose outlines to WTK
     logging.info(f"Converting outlines to WKT format")
-    prefix = ".".join(out_dir.split(".")[:-1])
+    prefix_list = out_dir.split(".")
+    if len(prefix_list) > 1:
+        prefix = prefix_list[:-1]
+    else:
+        prefix = prefix_list[0]
     outlines_file = os.path.join(out_dir, f"{prefix}_cp_outlines.txt")
     if os.path.exists(outlines_file):
         wkts = []
