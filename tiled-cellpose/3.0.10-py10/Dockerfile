@@ -1,5 +1,5 @@
 # Use an official Python runtime as a parent image
-FROM rapidsai/miniforge-cuda:cuda12.5.1-base-ubuntu22.04-py3.12
+FROM rapidsai/miniforge-cuda:cuda12.5.1-base-ubuntu22.04-py3.10
 
 # Set the working directory to /app
 WORKDIR /app
