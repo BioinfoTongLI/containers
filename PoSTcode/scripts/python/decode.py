@@ -8,11 +8,13 @@ import fire
 from avg_spot_profile import main as average_spot_profiles
 from decoding_functions import decoding_function, decoding_output_to_dataframe
 import logging
+from prepare_ISS import prepare_iss
+import os
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-VERSION="0.0.1"
+VERSION="0.1.0"
 
 
 def _get_codebook(codebook_path: str) -> pd.DataFrame:
@@ -44,10 +46,19 @@ def ReadPrepCodebook_ISS(codebook_path):
     codebook_in = _get_codebook(codebook_path)
     codes = codebook_in['code']
     n_genes = len(codes); n_rounds = len(str(codes[0]))
-    codebook_3d = np.zeros((n_genes, 1, n_rounds), dtype =  'uint8')
+    n_channel = -1
+    for channel in codebook_in.columns:
+        if 'channel' in channel:
+            channel_index = int(channel.split('_')[1].replace('channel', ''))
+            if channel_index > n_channel:
+                n_channel = channel_index
+    n_channel -= 1 #remove DAPI/Hoechst channel
+    codebook_3d = np.zeros((n_genes, n_channel, n_rounds), dtype =  'uint8')
     for ng in range(n_genes):
         for nr in range(n_rounds):
-            codebook_3d[ng, 0, nr] = int(str(codes[ng])[nr])
+            for nch in range(n_channel):
+                codebook_3d[ng, nch, nr] = int(codebook_in['channel_' + str(nch+1)][ng][nr])
+                # codebook_3d[ng, 0, nr] = int(str(codes[ng])[nr])
     gene_list_obj = np.array(codebook_in['gene'], dtype = object)
     return gene_list_obj, codebook_3d, n_genes
 
@@ -75,7 +86,8 @@ def decode(spot_locations_p: str,
            readouts_csv: str=None,
            keep_noises=True,
            min_prob = 0.95,
-           R:int=None) -> pd.DataFrame:
+           R:int=None,
+           **prepare_iss_kwargs) -> pd.DataFrame:
     """
     Decodes spots using the Postcode algorithm.
 
@@ -111,14 +123,15 @@ def decode(spot_locations_p: str,
         # np.save(f"{stem}_reshaped_spot_profile.npy", spot_profile)
         print(spot_profile.shape, spot_profile[0], type(spot_profile[0]), spot_profile[0].dtype)
 
-    if readouts_csv:
+    if os.path.getsize(readouts_csv) != 0: # MERFISH-like data, this file should be provided
         spot_profile, N_readouts = average_spot_profiles(spot_profile, readouts_csv) # Average is chosen over max for MERFISH-like profiles
         gene_list, codebook_arr, K = ReadPrepCodebook_MER(codebook_p, N_readouts)
     else:
-        gene_list, codebook_arr, K = ReadPrepCodebook_ISS(codebook_p)
+        codebook_arr, spot_profile, gene_list, K = prepare_iss(codebook_p, spot_profile_p, **prepare_iss_kwargs)
 
     assert spot_locations.shape[0] == spot_profile.shape[0]
     print(spot_profile.shape)
+    print(codebook_arr.shape)
     # Decode using postcode
     out = decoding_function(spot_profile, codebook_arr, print_training_progress=False)
     
