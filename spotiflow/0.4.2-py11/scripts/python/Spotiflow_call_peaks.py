@@ -27,11 +27,10 @@ def main(image_path:str, out_dir:str, out_name:str,
     peaks, _  = model.predict(crop)
 
     # Create the output directory if it doesn't exist
-    final_dir = f"{out_dir}_ch_{ch_ind}"
-    if not os.path.exists(final_dir):
-        os.makedirs(final_dir)
+    if not os.path.exists(out_dir):
+        os.makedirs(out_dir)
 
-    with open(f"{final_dir}/{out_name}", 'w', newline='') as f:
+    with open(f"{out_dir}/{out_name}", 'w', newline='') as f:
         writer = csv.writer(f)
         writer.writerow(['y', 'x'])  # write column names
         if len(peaks) > 0:
