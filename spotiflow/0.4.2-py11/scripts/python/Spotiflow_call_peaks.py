@@ -32,12 +32,10 @@ def main(image_path:str, out_dir:str, out_name:str,
         os.makedirs(final_dir)
 
     with open(f"{final_dir}/{out_name}", 'w', newline='') as f:
+        writer = csv.writer(f)
         writer.writerow(['y', 'x'])  # write column names
         if len(peaks) > 0:
-            y_min_str = str(y_min).zfill(5)  # pad with zeros for consistent file names
-            x_min_str = str(x_min).zfill(5)
             # Serialize peaks to disk as CSV
-            writer = csv.writer(f)
             writer.writerows(peaks)
 
 
