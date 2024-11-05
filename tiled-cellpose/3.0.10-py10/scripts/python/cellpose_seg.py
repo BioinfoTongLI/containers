@@ -11,12 +11,13 @@ import os
 from cellpose import core, io, models
 import numpy as np
 from shapely import Polygon, wkt, MultiPolygon
+from glob import glob
 
 import logging
 
 logging.basicConfig(level=logging.INFO)
 
-VERSION="0.0.2"
+VERSION="0.0.3"
 
 
 def main(
@@ -71,15 +72,18 @@ def main(
     )
     # convert cellpose outlines to WTK
     logging.info(f"Converting outlines to WKT format")
-    prefix_list = out_dir.split(".")
-    if len(prefix_list) > 1:
-        prefix = prefix_list[:-1]
-    else:
-        prefix = prefix_list[0]
-    outlines_file = os.path.join(out_dir, f"{prefix}_cp_outlines.txt")
-    if os.path.exists(outlines_file):
+    # prefix_list = out_dir.split(".")
+    # if len(prefix_list) > 1:
+    #     prefix = ".".join(prefix_list[:-1])
+    # else:
+    #     prefix = prefix_list[0]
+    # outlines_file = os.path.join(out_dir, f"{prefix}_cp_outlines.txt")
+    outline_file = glob(f"{out_dir}/*_cp_outlines.txt")
+
+    if len(outline_file) > 0:
+    # if os.path.exists(outlines_file):
         wkts = []
-        with open(outlines_file, "rt") as f:
+        with open(outline_file[0], "rt") as f:
             for line in f.readlines():
                 # split by comma and make integer
                 try:
