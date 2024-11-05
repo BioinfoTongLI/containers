@@ -40,16 +40,16 @@ Deprecating this function as it will duplicate the data and not used in the main
 #     return arr
 
 
-def main(image:str, out:str, overlap:int=30, chunk_size:int=4096, out_name:str="tile_coords.csv"):
+def main(image:str, out_dir:str, overlap:int=30, chunk_size:int=4096, out_name:str="tile_coords.csv"):
     img = AICSImage(image)
     lazy_one_plane = img.get_image_dask_data("XY")
     slices = calculate_slices(lazy_one_plane.shape, chunk_size, overlap)
-    os.mkdir(out)
+    os.mkdir(out_dir)
     # Create a CSV file to write the slices
-    csv_file = f"{out}/{out_name}"
+    csv_file = f"{out_dir}/{out_name}"
     with open(csv_file, "w", newline="") as f:
         writer = csv.writer(f)
-        writer.writerow(["Tile", "X1", "Y1", "X2", "Y2"])  # Write header
+        writer.writerow(["Tile", "X_MIN", "Y_MIN", "X_MAX", "Y_MAX"])  # Write header
 
         # Write each slice to the CSV file
         for i, slice in enumerate(slices):
