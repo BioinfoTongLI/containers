@@ -7,72 +7,38 @@
 """
 import fire
 from aicsimageio import AICSImage
-import numpy as np
 from spotiflow.model import Spotiflow
-from dask.distributed import Client
-import numpy as np
-import math
 import csv
 import os
 
 
-def spotiflow_call(block, block_info, model_name, edge, final_dir, ch_index):
-    model = Spotiflow.from_pretrained(model_name)
-    # print(block_info)
-    try:
-        y_min = block_info[None]["array-location"][0][0]
-        x_min = block_info[None]["array-location"][1][0]
-        
-        y_chunk_loc = block_info[None]["chunk-location"][0]
-        x_chunk_loc = block_info[None]["chunk-location"][1]
-    except:
-        pass
-    peaks, _  = model.predict(block)
-    if len(peaks) > 0:
-        peaks[:, 0] += y_min - y_chunk_loc * 2 * edge
-        peaks[:, 1] += x_min - x_chunk_loc * 2 * edge
-
-        # Serialize peaks to disk
-        y_min_str = str(y_min).zfill(5)  # pad with zeros for consistent file names
-        x_min_str = str(x_min).zfill(5)
-
-        # Serialize peaks to disk as CSV
-        with open(f"{final_dir}/ch_{ch_index}_peaks_Y{y_min_str}_X{x_min_str}.csv", 'w', newline='') as f:
-            writer = csv.writer(f)
-            writer.writerow(['y', 'x'])  # write column names
-            writer.writerows(peaks)
-        del peaks, _
-    return block
-
-
-def main(image_path:str, out_dir:str,
+def main(image_path:str, out_dir:str, out_name:str,
+         x_min:int, x_max:int, y_min:int, y_max:int,
          ch_ind:int=2, model_name:str="general",
-         depth:int = 10, chunk_size:int=2000):
-    hyperstack = AICSImage(image_path)
-    print(hyperstack.dims)
+         zs:list=[0]):
+    img = AICSImage(image_path)
+    lazy_one_plane = img.get_image_dask_data(
+        "ZCYX",
+        T=0, # only one time point is allowed for now
+        C=ch_ind,
+        Z=zs)
+    crop = lazy_one_plane[:, :, y_min:y_max, x_min:x_max].squeeze().compute()
+    model = Spotiflow.from_pretrained(model_name)
+    peaks, _  = model.predict(crop)
 
     # Create the output directory if it doesn't exist
     final_dir = f"{out_dir}_ch_{ch_ind}"
     if not os.path.exists(final_dir):
         os.makedirs(final_dir)
 
-    with Client(processes=True, threads_per_worker=1, n_workers=1): #memory_limit='20GB'):
-        for t in range(hyperstack.dims.T):
-            img = hyperstack.get_image_dask_data("ZYX", T=t, C=ch_ind)
-            img = np.max(img, axis=0)
-            img = img.rechunk((chunk_size, chunk_size))
-
-            # Predict
-            points = img.map_overlap(
-                spotiflow_call,
-                model_name=model_name,
-                depth=depth,
-                edge=depth,
-                final_dir=final_dir,
-                ch_index=ch_ind,
-                dtype=np.float16
-            )
-            _ = points.compute()
+    with open(f"{final_dir}/{out_name}", 'w', newline='') as f:
+        writer.writerow(['y', 'x'])  # write column names
+        if len(peaks) > 0:
+            y_min_str = str(y_min).zfill(5)  # pad with zeros for consistent file names
+            x_min_str = str(x_min).zfill(5)
+            # Serialize peaks to disk as CSV
+            writer = csv.writer(f)
+            writer.writerows(peaks)
 
 
 if __name__ == "__main__":
