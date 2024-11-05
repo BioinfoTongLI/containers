@@ -20,8 +20,6 @@ RUN mamba env update -n base -f /tmp/conda-env.yml && \
     chmod -R 755 /docker && \
     chmod -R 755 /opt/
 
-ENV SPOTIFLOW_CACHE_DIR=/tmp/spotiflow_cache
-
 # Final stage
 FROM rapidsai/miniforge-cuda:cuda11.8.0-base-ubuntu22.04-py3.11
 
