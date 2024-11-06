@@ -8,9 +8,9 @@
 import fire
 from aicsimageio import AICSImage
 from spotiflow.model import Spotiflow
-from shapely.affinity import translate
 import csv
 import os
+import numpy as np
 
 
 def main(image_path:str, out_dir:str, out_name:str,
@@ -25,8 +25,7 @@ def main(image_path:str, out_dir:str, out_name:str,
         Z=zs)
     crop = lazy_one_plane[:, :, y_min:y_max, x_min:x_max].squeeze().compute()
     model = Spotiflow.from_pretrained(model_name)
-    peaks, _  = model.predict(crop)
-
+    peaks, details  = model.predict(crop)
 
     # Create the output directory if it doesn't exist
     if not os.path.exists(out_dir):
@@ -37,7 +36,9 @@ def main(image_path:str, out_dir:str, out_name:str,
         writer.writerow(['y', 'x'])  # write column names
         if len(peaks) > 0:
             # Serialize peaks to disk as CSV
-            writer.writerows([translate(peaks[0], xoff=x_max, yoff=y_min)])
+            peaks[0, :] = peaks[0, :] + y_min
+            peaks[1, :] = peaks[1, :] + x_min 
+            writer.writerows(peaks)
 
 
 if __name__ == "__main__":
