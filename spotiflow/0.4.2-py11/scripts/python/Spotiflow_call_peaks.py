@@ -36,8 +36,8 @@ def main(image_path:str, out_dir:str, out_name:str,
         writer.writerow(['y', 'x'])  # write column names
         if len(peaks) > 0:
             # Serialize peaks to disk as CSV
-            peaks[0, :] = peaks[0, :] + y_min
-            peaks[1, :] = peaks[1, :] + x_min 
+            peaks[:, 0] = peaks[:, 0] + y_min
+            peaks[:, 1] = peaks[:, 1] + x_min 
             writer.writerows(peaks)
 
 
