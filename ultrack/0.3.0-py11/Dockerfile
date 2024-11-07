@@ -5,12 +5,7 @@ RUN apt-get update && \
 
 WORKDIR /opt
 
-# nightly
-# RUN pip install git+https://github.com/royerlab/ultrack
-
-# v0.3.0
-RUN pip install https://github.com/royerlab/ultrack/archive/refs/tags/v0.3.0.zip
-
+RUN pip install https://github.com/royerlab/ultrack/archive/refs/tags/v0.5.0.zip
 
 COPY Dockerfile /docker
 
