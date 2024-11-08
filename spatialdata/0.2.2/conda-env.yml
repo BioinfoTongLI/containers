@@ -1,10 +1,10 @@
 channels:
   - conda-forge
 dependencies:
-  - numpy=2.1.0
   - pip
   - pip:
       - fire==0.6.0
       - spatialdata==0.2.2
       - shapely==2.0.3
       - spatialdata-io==0.1.4
+      - numpy==1.26.4
