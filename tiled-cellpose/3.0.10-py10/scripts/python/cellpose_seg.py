@@ -12,12 +12,14 @@ from cellpose import core, io, models
 import numpy as np
 from shapely import Polygon, wkt, MultiPolygon
 from glob import glob
+import tifffile
+import zarr
 
 import logging
 
 logging.basicConfig(level=logging.INFO)
 
-VERSION="0.0.3"
+VERSION="0.1.1"
 
 
 def main(
@@ -28,11 +30,11 @@ def main(
     cellpose_model:str="cyto3",
     zs:list=[0],
     channels:list=[0, 0],
+    resolution_level:int=0,
     **cp_params
     ):
 
     logging.info(f"Loading Cellpose model: {cellpose_model} (GPU: {core.use_gpu()})")
-
     model = models.Cellpose(gpu=core.use_gpu(), model_type=cellpose_model)
     # model = denoise.CellposeDenoiseModel(
     #     gpu=core.use_gpu(),
@@ -41,14 +43,22 @@ def main(
     #     chan2_restore=False
     # )
 
-    img = AICSImage(image)
-    ch_ind = channels[0] if len(np.unique(channels)) == 1 else channels
-    lazy_one_plane = img.get_image_dask_data(
-        "ZCYX",
-        T=0, # only one time point is allowed for now
-        C=ch_ind,
-        Z=zs)
-    crop = lazy_one_plane[:, :, y_min:y_max, x_min:x_max].compute()
+    if image.endswith(".tif") or image.endswith(".tiff"):
+        store = tifffile.imread(image, aszarr=True)
+        zgroup = zarr.open(store, mode="r")
+        image = zgroup[resolution_level]
+
+        crop = image[y_min:y_max, x_min:y_max]
+    else:
+        img = AICSImage(image)
+        ch_ind = channels[0] if len(np.unique(channels)) == 1 else channels
+        lazy_one_plane = img.get_image_dask_data(
+            "ZCYX",
+            T=0, # only one time point is allowed for now
+            C=ch_ind,
+            Z=zs)
+        crop = lazy_one_plane[:, :, y_min:y_max, x_min:x_max].compute()
+
     masks, flows, _, _ = model.eval(
         crop,
         channels=channels,
