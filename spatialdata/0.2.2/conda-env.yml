@@ -4,7 +4,7 @@ dependencies:
   - pip
   - pip:
       - fire==0.6.0
-      - spatialdata==0.2.2
+      - spatialdata==0.2.5
       - shapely==2.0.3
-      - spatialdata-io==0.1.4
+      - spatialdata-io==0.1.5
       - numpy==1.26.4
