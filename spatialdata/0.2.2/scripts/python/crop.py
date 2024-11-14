@@ -14,7 +14,7 @@ def main(
         sdata:str,
         index_json:str,
         out_name:str,
-        element_name:str,
+        element_name:str="cell_boundaries",
         **sdata_kwargs
     ):
     sdata = sd.read_zarr(sdata, sdata_kwargs)
