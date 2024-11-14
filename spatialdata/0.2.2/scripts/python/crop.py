@@ -15,10 +15,11 @@ def main(
         index_json:str,
         out_name:str,
         element_name:str="cell_boundaries",
+        element_list:list=["cell_labels", "morphology_focus"],
         **sdata_kwargs
     ):
     sdata = sd.read_zarr(sdata, sdata_kwargs)
-    sdata = sdata.subset(["morphology_focus", "cell_labels", element_name])
+    sdata = sdata.subset(element_list + [element_name])
     indexes = json.loads(open(index_json).read())
     if not os.path.exists(out_name):
         os.makedirs(out_name)
