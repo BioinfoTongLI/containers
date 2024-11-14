@@ -17,7 +17,10 @@ def main(
         element_name:str="cell_boundaries",
          **sdata_kwargs):
     sdata = sd.read_zarr(sdata, sdata_kwargs)
-    sections = np.array_split(sdata.shapes[element_name], n_partition)
+    if n_partition == 1:
+        sections = sdata.shapes[element_name]
+    else:
+        sections = np.array_split(sdata.shapes[element_name], n_partition)
 
     # Get the indexes of each section
     indexes = [section.index for section in sections]
