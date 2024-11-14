@@ -17,21 +17,22 @@ def main(
         element_name:str="cell_boundaries",
          **sdata_kwargs):
     sdata = sd.read_zarr(sdata, sdata_kwargs)
-    if n_partition == 1:
-        sections = sdata.shapes[element_name]
-    else:
-        sections = np.array_split(sdata.shapes[element_name], n_partition)
-
-    # Get the indexes of each section
-    indexes = [section.index for section in sections]
-
     if not os.path.exists(out_name):
         os.makedirs(out_name)
+    if n_partition == 1:
+        with open(f"{out_name}/section_0.json", "w") as file:
+            json.dump(sdata.shapes[element_name].index.tolist(), file)
+    else:
+        sections = np.array_split(sdata.shapes[element_name], n_partition)
+        indexes = [section.index for section in sections]
+        # Serialize indexes into JSON files
+        for i, index in enumerate(indexes):
+            with open(f"{out_name}/section_{i}.json", "w") as file:
+                json.dump(index.tolist(), file)
 
-    # Serialize indexes into JSON files
-    for i, index in enumerate(indexes):
-        with open(f"{out_name}/section_{i}.json", "w") as file:
-            json.dump(index.tolist(), file)
+    
+
+    
 
 
 if __name__ == '__main__':
