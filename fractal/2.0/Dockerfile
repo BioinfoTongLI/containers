@@ -12,6 +12,8 @@ RUN mamba env update -n base -f /tmp/conda-env.yml
 
 RUN pip install git+https://github.com/jluethi/fractal-helper-tasks.git
 
+COPY scripts/python /opt/scripts/
+
 COPY Dockerfile /docker
 
 RUN chmod -R 755 /docker
