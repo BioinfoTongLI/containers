@@ -1,7 +1,7 @@
 FROM python:3.12-slim
 
-# RUN apt-get update && \
-#     apt-get install -y libtiff5 git
+RUN apt-get update && \
+    apt-get install -y procps
 
 COPY scripts/python /opt/scripts/
 COPY requirements.txt /opt/scripts/
