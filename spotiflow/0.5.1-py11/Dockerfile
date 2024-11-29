@@ -28,12 +28,14 @@ RUN mkdir -p $SPOTIFLOW_CACHE_DIR && \
 # Final stage
 FROM rapidsai/miniforge-cuda:cuda11.8.0-base-ubuntu22.04-py3.11
 
+ENV SPOTIFLOW_CACHE_DIR="/models/"
+
 COPY --from=builder /opt /opt
 COPY --from=builder /scripts /scripts
 COPY --from=builder /docker /docker
 COPY --from=builder $SPOTIFLOW_CACHE_DIR $SPOTIFLOW_CACHE_DIR
 
+RUN chmod -R 777 "/models"
 # Set the environment variable again in the final stage
-ENV SPOTIFLOW_CACHE_DIR="/models/"
 
 WORKDIR /opt
