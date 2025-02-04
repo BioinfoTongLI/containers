@@ -15,7 +15,7 @@ RUN python -m venv $VENV_PATH && \
 
 # install package
 RUN apt-get install -y default-jre zlib1g-dev
-RUN git clone -b package https://github.com/instanseg/instanseg.git /opt/instanseg && \
+RUN git clone https://github.com/instanseg/instanseg.git /opt/instanseg && \
     . $VENV_PATH/bin/activate && \
     pip install 'torch==2.4.1+cu121' --index-url https://download.pytorch.org/whl/cu121 && \
     pip install slideio 'bfio[all]' && \
