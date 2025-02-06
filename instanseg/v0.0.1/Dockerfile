@@ -11,10 +11,10 @@ RUN apt-get update && apt-get install -y \
 RUN python -m venv $VENV_PATH && \
     . $VENV_PATH/bin/activate && \
     pip install --upgrade pip wheel setuptools && \
-    pip install shapely zarr tqdm numpy pandas tifffile imagecodecs
+    pip install shapely zarr tqdm numpy pandas tifffile imagecodecs fire aicsimageio opencv-python-headless
 
 # install package
-RUN apt-get install -y default-jre zlib1g-dev
+RUN apt-get update && apt-get install -y default-jre zlib1g-dev
 RUN git clone https://github.com/instanseg/instanseg.git /opt/instanseg && \
     . $VENV_PATH/bin/activate && \
     pip install 'torch==2.4.1+cu121' --index-url https://download.pytorch.org/whl/cu121 && \
