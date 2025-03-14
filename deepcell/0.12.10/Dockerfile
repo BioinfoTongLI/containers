@@ -12,13 +12,13 @@ RUN apt-get update && apt-get install -y \
 RUN python -m venv $VIRTUAL_ENV && \
     . $VIRTUAL_ENV/bin/activate && \
     pip install --upgrade pip wheel setuptools && \
-    pip install shapely zarr tqdm numpy pandas tifffile imagecodecs
+    pip install imagecodecs ImageTileProcessor==0.1.6
 
 ENV DEEPCELL_VERSION=0.12.10
-RUN apt install -y graphviz
+RUN apt-get update && apt install -y graphviz
 RUN . $VIRTUAL_ENV/bin/activate && \
     pip install DeepCell==$DEEPCELL_VERSION
 
 COPY Dockerfile /docker/
-COPY models /root/.deepcell/
+COPY models /root/.deepcell/models
 RUN chmod -R 755 /docker

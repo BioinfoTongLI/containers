@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y \
 RUN python -m venv $VENV_PATH && \
     . $VENV_PATH/bin/activate && \
     pip install --upgrade pip wheel setuptools && \
-    pip install shapely zarr tqdm numpy pandas tifffile imagecodecs fire aicsimageio opencv-python-headless
+    pip install imagecodecs opencv-python-headless ImageTileProcessor==0.1.6
 
 # install package
 RUN apt-get update && apt-get install -y default-jre zlib1g-dev
