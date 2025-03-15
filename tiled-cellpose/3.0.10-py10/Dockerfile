@@ -20,6 +20,8 @@ COPY scripts/python /scripts/
 
 RUN python -c "from cellpose import core, io, models; model = models.Cellpose(model_type='cyto3')"
 
+RUN chmod -R 755 $CELLPOSE_LOCAL_MODELS_PATH
+
 # Copy Dockerfile
 COPY Dockerfile /docker
 
