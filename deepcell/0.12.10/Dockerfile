@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y \
 RUN python -m venv $VIRTUAL_ENV && \
     . $VIRTUAL_ENV/bin/activate && \
     pip install --upgrade pip wheel setuptools && \
-    pip install imagecodecs ImageTileProcessor==0.1.6
+    pip install imagecodecs ImageTileProcessor==0.1.9
 
 ENV DEEPCELL_VERSION=0.12.10
 RUN apt-get update && apt install -y graphviz
