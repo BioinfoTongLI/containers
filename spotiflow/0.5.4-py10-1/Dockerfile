@@ -16,7 +16,7 @@ COPY Dockerfile /docker
 RUN chmod -R 755 /usr/bin/ && \
     chmod -R 755 /docker && \
     chmod -R 755 /opt/
-RUN /opt/conda/bin/conda run -n base pip install spotiflow==0.5.4 ImageTileProcessor==0.1.6 pyarrow==19.0.1
+RUN /opt/conda/bin/conda run -n base pip install spotiflow==0.5.4 ImageTileProcessor==0.1.11 pyarrow==19.0.1
     # chmod -R 755 /scripts/ && \
 
 ENV SPOTIFLOW_CACHE_DIR="/models/"
