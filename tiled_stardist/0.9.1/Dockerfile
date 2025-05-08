@@ -16,7 +16,7 @@ RUN python -m venv $VIRTUAL_ENV && \
 ENV STARDIST_VERSION=0.9.1
 RUN . $VIRTUAL_ENV/bin/activate && \
     pip install 'tensorflow[and-cuda]==2.11.0' && \
-    pip install stardist==$STARDIST_VERSION csbdeep==0.8.1 gputools==0.2.16 edt==3.0.0 ImageTileProcessor==0.1.6
+    pip install stardist==$STARDIST_VERSION csbdeep==0.8.1 gputools==0.2.16 edt==3.0.0 ImageTileProcessor==0.1.11
 
 COPY Dockerfile /docker/
 RUN chmod -R 755 /docker
