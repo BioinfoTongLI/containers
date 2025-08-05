@@ -14,3 +14,5 @@ openpyxl==3.1.2
 
 scikit-image==0.24.0
 starfish==0.3.2
+pysnooper==1.2.3
+aicsimageio==4.10.0
