@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies
-RUN pip install -U --no-cache-dir ImageTileProcessor==0.1.15 pyarrow==19.0.1 bioformats_jar==2020.5.27 'aicsimageio[nd2]'
+RUN pip install -U --no-cache-dir ImageTileProcessor==0.1.16 pyarrow==19.0.1
 
 # Set permissions
 RUN chmod -R 755 /usr/bin/ && chmod -R 755 /opt/
