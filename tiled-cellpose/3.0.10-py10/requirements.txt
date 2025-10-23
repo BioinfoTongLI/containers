@@ -1,4 +1,4 @@
 cellpose==3.0.10
 bioformats_jar==2020.5.27
-ImageTileProcessor==0.1.11
-tifffile==2024.7.24
+ImageTileProcessor==0.1.16
+tifffile==2022.4.8
